@@ -34,7 +34,7 @@ pub fn fitsu(n: u64, width: u64) -> bool {
 /// a signed value corresponding to the 2s complement representation
 /// of the appropriate field of the `word`
 /// or `None` if the field is impossible
-pub fn gets(word: u64, width: u64, lsb: u64) -> i64 {
+pub fn gets(word: u64, width: u64, lsb: u64) -> Option<i64> {
     // check if the field is possible
     if lsb + width > 64 {
         return None;
@@ -53,7 +53,7 @@ pub fn gets(word: u64, width: u64, lsb: u64) -> i64 {
         let extended_word = shifted_word | sign_extend;
         // convert the field to a signed value
         let signed_word = extended_word as i64;
-        signed_word
+        Some(signed_word)
     } else {
         Some(shifted_word as i64)
     }
