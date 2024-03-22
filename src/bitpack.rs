@@ -6,7 +6,8 @@ use std::convert::TryInto;
 /// * `n`: A signed integer value
 /// * `width`: the width of a bit field
 pub fn fitss(n: i64, width: u64) -> bool {
-    false
+    let n_bits = n.to_be_bytes().len() as u64 * 8;
+    n >= -(1 << (width - 1)) && n < 1 << (width - 1)
 }
 
 /// Returns true iff the unsigned value `n` fits into `width` unsigned bits.
@@ -15,7 +16,7 @@ pub fn fitss(n: i64, width: u64) -> bool {
 /// * `n`: An usigned integer value
 /// * `width`: the width of a bit field
 pub fn fitsu(n: u64, width: u64) -> bool {
-    false
+    n < 1 << width
 }
 
 /// Retrieve a signed value from an unsigned `word`,
@@ -34,7 +35,28 @@ pub fn fitsu(n: u64, width: u64) -> bool {
 /// of the appropriate field of the `word`
 /// or `None` if the field is impossible
 pub fn gets(word: u64, width: u64, lsb: u64) -> i64 {
-    0
+    // check if the field is possible
+    if lsb + width > 64 {
+        return None;
+    }
+    // create a mask to clear the field
+    let mask = !(((1 << width) - 1) << lsb);
+    // clear the field
+    let cleared_word = word & mask;
+    // shift the field to the least significant bit
+    let shifted_word = cleared_word >> lsb;
+    // check if the field is negative
+    if shifted_word & (1 << (width - 1)) != 0 {
+        // create a mask to extend the sign bit
+        let sign_extend = !((1 << width) - 1);
+        // extend the sign bit
+        let extended_word = shifted_word | sign_extend;
+        // convert the field to a signed value
+        let signed_word = extended_word as i64;
+        signed_word
+    } else {
+        Some(shifted_word as i64)
+    }
 }
 
 /// Retrieve a signed value from an unsigned `word`,
@@ -55,8 +77,18 @@ pub fn gets(word: u64, width: u64, lsb: u64) -> i64 {
 /// or None
 /// if `lsb + width > 64`
 ///
-pub fn getu(word: u64, width: u64, lsb: u64) -> u64 {
-    0
+pub fn getu(word: u64, width: u64, lsb: u64) -> Option<u64> {
+    // check if the field is possible
+    if lsb + width > 64 {
+        return None;
+    }
+    // create a mask to clear the field
+    let mask = !(((1 << width) - 1) << lsb);
+    // clear the field
+    let cleared_word = word & mask;
+    // shift the field to the least significant bit
+    let shifted_word = cleared_word >> lsb;
+    Some(shifted_word)
 }
 
 /// Given an unsigned 64-bit `word`, and an unsigned `value`,
@@ -75,7 +107,20 @@ pub fn getu(word: u64, width: u64, lsb: u64) -> u64 {
 /// an `Option<u64>` which contains the desired value at the appropriate field, if possible
 /// If the value does not fit, returns `None`
 pub fn newu(word: u64, width: u64, lsb: u64, value: u64) -> Option<u64> {
-    Some(0)
+    // check if the value fits in the field of the word starting at lsb and having width bits
+    if fitsu(value, width) {
+        // create a mask to clear the field
+        let mask = !(((1 << width) - 1) << lsb);
+        // clear the field
+        let cleared_word = word & mask;
+        // shift the value to the correct position
+        let shifted_value = value << lsb;
+        // set the field to the value
+        let new_word = cleared_word | shifted_value;
+        Some(new_word)
+    } else {
+        None
+    }
 }
 
 /// Given an unsigned 64-bit `word`, and a signed `value`,
@@ -95,7 +140,20 @@ pub fn newu(word: u64, width: u64, lsb: u64, value: u64) -> Option<u64> {
 /// If the value does not fit, returns `None`
 ///
 pub fn news(word: u64, width: u64, lsb: u64, value: i64) -> Option<u64> {
-    Some(0)
+    // check if the value fits in the field of the word starting at lsb and having width bits
+    if fitss(value, width) {
+        // create a mask to clear the field
+        let mask = !(((1 << width) - 1) << lsb);
+        // clear the field
+        let cleared_word = word & mask;
+        // shift the value to the correct position
+        let shifted_value = (value as u64) << lsb;
+        // set the field to the value
+        let new_word = cleared_word | shifted_value;
+        Some(new_word)
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
