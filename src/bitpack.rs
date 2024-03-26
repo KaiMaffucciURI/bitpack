@@ -1,4 +1,4 @@
-use std::convert::TryInto;
+//use std::convert::TryInto;
 
 /// Returns true iff the signed value `n` fits into `width` signed bits.
 ///
@@ -6,8 +6,11 @@ use std::convert::TryInto;
 /// * `n`: A signed integer value
 /// * `width`: the width of a bit field
 pub fn fitss(n: i64, width: u64) -> bool {
-    let n_bits = n.to_be_bytes().len() as u64 * 8;
-    n >= -(1 << (width - 1)) && n < 1 << (width - 1)
+    let max = 1 << (width - 1);
+    let min = -(1 << (width - 1));
+    n >= min && n < max
+    //let n_bits = n.to_be_bytes().len() as u64 * 8;
+    //n >= -(1 << (width - 1)) && n < 1 << (width - 1)
 }
 
 /// Returns true iff the unsigned value `n` fits into `width` unsigned bits.
