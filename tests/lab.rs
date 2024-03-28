@@ -26,14 +26,19 @@ fn check_laws(word: u64, w: u64, lsb: u64, val: u64, w2: u64, lsb2: u64) {
 fn test_check_laws() {
     //let mut rng = rand::thread_rng();
     // 65 here was messing everything up, 64 made it work
-    for w in 0..64 { // upper value is excluded
-        for lsb in 0..(64-w) {
+    for w in 0..65 { // upper value is excluded
+        for lsb in 0..(65-w) {
             for _trial in 0..1001 {
                 // set other parameter values randomly
                 // val is a random number that can fit in w
-                let val = rand::random::<u64>() % (1 << w);
-                let w2 = rand::random::<u64>() % 64;
-                let lsb2 = rand::random::<u64>() % (64-w2);
+                let val: u64;
+                if w == 64 {
+                    val= 0;
+                } else {
+                    val = rand::random::<u64>() % (1 << w);
+                }
+                let w2 = rand::random::<u64>() % 65;
+                let lsb2 = rand::random::<u64>() % (65-w2);
                 // set other parameter values randomly with rng
                 /*let val = rng.gen_range(0..(1 << w));
                 let w2 = rng.gen_range(0..65);
