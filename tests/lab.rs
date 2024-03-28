@@ -33,7 +33,7 @@ fn test_check_laws() {
                 // val is a random number that can fit in w
                 let val: u64;
                 if w == 64 {
-                    val= 0;
+                    val= rand::random::<u64>();
                 } else {
                     val = rand::random::<u64>() % (1 << w);
                 }
