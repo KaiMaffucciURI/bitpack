@@ -39,9 +39,7 @@ pub fn gets(word: u64, width: u64, lsb: u64) -> Option<i64> {
     // check if the field is possible
     if lsb + width > 64 {
         return None;
-    } else if width == 0 || width + lsb == 64 {
-        return Some(0);
-    }
+    } 
     Some(((((1 << width) - 1) << lsb) & word) as i64 >> lsb)
 }
 
@@ -66,8 +64,6 @@ pub fn getu(word: u64, width: u64, lsb: u64) -> Option<u64> {
     // check if the field is possible
     if lsb + width > 64 {
         return None;
-    } else if width == 0 || width + lsb == 64 {
-        return Some(0);
     }
     let new_word: u64 = word << (64 - (lsb + width));
     Some(new_word >> (64 - width))
@@ -89,12 +85,11 @@ pub fn getu(word: u64, width: u64, lsb: u64) -> Option<u64> {
 /// an `Option<u64>` which contains the desired value at the appropriate field, if possible
 /// If the value does not fit, returns `None`
 pub fn newu(word: u64, width: u64, lsb: u64, value: u64) -> Option<u64> {
-    if lsb + width >= 64 {
+    if lsb + width > 64 {
         return None;
     }
     // check if the value fits in the field of the word starting at lsb and having width bits
     if fitsu(value, width) {
-
         let mask: u64 = ((1 << width) - 1) << lsb;
         let masked_word = word & !mask;
         let masked_value = ((value) << lsb) & mask;
