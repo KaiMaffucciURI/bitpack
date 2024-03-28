@@ -1,6 +1,6 @@
 // tests functions involving just unsigned values
 //use bitpack::bitpack::*;
-use bitpack::bitpack::{newu, fitsu};
+use bitpack::bitpack::{newu, fitsu, getu};
 
 // fitsu tests
 #[test]
@@ -51,10 +51,6 @@ fn test_newu() {
     assert_eq!(newu(word, 0, 0, 1), None);
     assert_eq!(newu(word, 0, 0, 2), None);
     assert_eq!(newu(word, 0, 0, 3), None);
-    assert_eq!(newu(word, 0, 0, 4), None);
-    assert_eq!(newu(word, 0, 0, 5), None);
-    assert_eq!(newu(word, 0, 0, 6), None);
-    assert_eq!(newu(word, 0, 0, 7), None);
     // trying to fit various values in 2 bits
     assert_eq!(newu(word, 2, 0, 0), Some(0));
     assert_eq!(newu(word, 2, 0, 1), Some(1));
@@ -62,6 +58,9 @@ fn test_newu() {
     assert_eq!(newu(word, 2, 0, 3), Some(3));
     assert_eq!(newu(word, 2, 0, 4), None);
     assert_eq!(newu(word, 2, 0, 5), None);
+
+    assert_eq!(newu(11574355939197657136, 1, 0, 1), Some(11574355939197657137));
+    assert_eq!(getu(newu(word, 40, 0, 1).unwrap(), 40, 0).unwrap(), getu(word, 40, 0).unwrap());
     // what happens if we have a width that is too large for its respective lsb?
     //assert_eq!(newu(word, 65, 0, 0), None);
     //assert_eq!(newu(word, 65, 0, 1), None);

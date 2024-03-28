@@ -41,6 +41,16 @@ pub fn gets(word: u64, width: u64, lsb: u64) -> Option<i64> {
     // check if the field is possible
     if lsb + width > 64 {
         return None;
+    } else if width == 0 || width + lsb == 64 {
+        return Some(0);
+    }
+    Some(((((1 << width) - 1) << lsb) & word) as i64 >> lsb)
+}
+
+/*pub fn gets(word: u64, width: u64, lsb: u64) -> Option<i64> {
+    // check if the field is possible
+    if lsb + width > 64 {
+        return None;
     }
     // create a mask to clear the field
     let mask = !(((1 << width) - 1) << lsb);
@@ -60,7 +70,7 @@ pub fn gets(word: u64, width: u64, lsb: u64) -> Option<i64> {
     } else {
         Some(shifted_word as i64)
     }
-}
+}*/
 
 /// Retrieve a signed value from an unsigned `word`,
 /// beginning at least significant bit `lsb`
@@ -80,25 +90,43 @@ pub fn gets(word: u64, width: u64, lsb: u64) -> Option<i64> {
 /// or None
 /// if `lsb + width > 64`
 ///
+// pub fn getu(word: u64, width: u64, lsb: u64) -> Option<u64> {
+//     // check if the field is possible
+//     if lsb + width > 64 {
+//         return None;
+//     }
+//     // create a mask to clear the field
+//     let mask = !(((1 << width) - 1) << lsb);
+//     // clear the field
+//     let cleared_word = word & mask;
+//     // shift the field to the least significant bit
+//     let shifted_word = cleared_word >> lsb;
+//     Some(shifted_word)
+// }
+
 pub fn getu(word: u64, width: u64, lsb: u64) -> Option<u64> {
     // check if the field is possible
     if lsb + width > 64 {
         return None;
+    } else if width == 0 || width + lsb == 64 {
+        return Some(0);
     }
-    // create a mask to clear the field
-    let mask = !(((1 << width) - 1) << lsb);
-    // clear the field
-    let cleared_word = word & mask;
-    // shift the field to the least significant bit
-    let shifted_word = cleared_word >> lsb;
-    Some(shifted_word)
+    let new_word: u64 = word << (64 - (lsb + width));
+    Some(new_word >> (64 - width))
 }
 
 /// Given an unsigned 64-bit `word`, and an unsigned `value`,
 /// pack that `value` into `width` bits of the `word` starting at
 /// least-significant bit `lsb`, if possible.
 ///
-/// # Arguments
+//     // create a mask to clear the field
+//     let mask = !(((1 << width) - 1) << lsb);
+//     // clear the field
+//     let cleared_word = word & mask;
+//     // shift the field to the least significant bit
+//     let shifted_word = cleared_word >> lsb;
+//     Some(shifted_word)
+// /// # Arguments
 ///
 /// * `word` - an arbitrary unsigned 64-bit word
 /// * `width` - a number of bits describing a field
@@ -110,16 +138,25 @@ pub fn getu(word: u64, width: u64, lsb: u64) -> Option<u64> {
 /// an `Option<u64>` which contains the desired value at the appropriate field, if possible
 /// If the value does not fit, returns `None`
 pub fn newu(word: u64, width: u64, lsb: u64, value: u64) -> Option<u64> {
+    if lsb + width >= 64 {
+        return None;
+    }
     // check if the value fits in the field of the word starting at lsb and having width bits
     if fitsu(value, width) {
         // create a mask to clear the field
-        let mask = !(((1 << width) - 1) << lsb);
+        //let mask = !(((1 << width) - 1) << lsb);
         // clear the field
-        let cleared_word = word & mask;
+        //let cleared_word = word & mask;
         // shift the value to the correct position
-        let shifted_value = value << lsb;
+        //let shifted_value = value << lsb;
         // set the field to the value
-        let new_word = cleared_word | shifted_value;
+        //let new_word = cleared_word | shifted_value;
+        //Some(new_word)
+
+        let mask: u64 = ((1 << width) - 1) << lsb;
+        let masked_word = word & !mask;
+        let masked_value = ((value) << lsb) & mask;
+        let new_word = masked_word | masked_value;
         Some(new_word)
     } else {
         None
@@ -146,24 +183,28 @@ pub fn news(word: u64, width: u64, lsb: u64, value: i64) -> Option<u64> {
     // check if the value fits in the field of the word starting at lsb and having width bits
     if fitss(value, width) {
         // create a mask to clear the field
-        let mask = !(((1 << width) - 1) << lsb);
+        //let mask = !(((1 << width) - 1) << lsb);
         // clear the field
-        let cleared_word = word & mask;
+        //let cleared_word = word & mask;
         // shift the value to the correct position
-        let shifted_value = (value as u64) << lsb;
+        //let shifted_value = (value as u64) << lsb;
         // set the field to the value
-        let new_word = cleared_word | shifted_value;
+        //let new_word = cleared_word | shifted_value;
+        //Some(new_word)
+
+        //let mask = (1 << width) - 1;
+        //Some((val as u64 & mask) << lsb) | (word & !(mask & !(lsb)))
+        //Some((value as u64) << lsb | word & !(mask << lsb))
+        
+        //let mask: u64 = !(((1 << width) - 1) << lsb);
+        //let new_word = (word & mask) | ((value as u64) << lsb);
+        let mask: u64 = ((1 << width) - 1) << lsb;
+        let masked_word = word & !mask;
+        let masked_value = ((value as u64) << lsb) & mask;
+        let new_word = masked_word | masked_value;
         Some(new_word)
+        
     } else {
         None
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
     }
 }
