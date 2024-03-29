@@ -1,4 +1,4 @@
-//use std::convert::TryInto;
+//use std::convert::TryInto; // leftover from prof, idk what its original purpose was, but im leaving it here to maybe get an answer
 
 /// Returns true iff the signed value `n` fits into `width` signed bits.
 ///
@@ -7,9 +7,17 @@
 /// * `width`: the width of a bit field
 pub fn fitss(n: i64, width: u64) -> bool {
     // need to test
-    let max = 1 << (width - 1);
-    let min = -(1 << (width - 1));
-    n >= min && n < max
+    if width == 64 {
+        return true;
+    } else if width > 64 {
+        return false;
+    } else if width == 0 {
+        return n == 0;
+    } else {
+        let max = 1 << (width - 1);
+        let min = -(1 << (width - 1));
+        n >= min && n < max
+    }
 }
 
 /// Returns true iff the unsigned value `n` fits into `width` unsigned bits.
@@ -20,6 +28,8 @@ pub fn fitss(n: i64, width: u64) -> bool {
 pub fn fitsu(n: u64, width: u64) -> bool {
     if width == 64 {
         return true;
+    } else if width > 64 {
+        return false;
     } else {
         return n < 1 << width;
     }
@@ -44,8 +54,17 @@ pub fn gets(word: u64, width: u64, lsb: u64) -> Option<i64> {
     // check if the field is possible
     if lsb + width > 64 {
         return None;
-    } 
-    Some(((((1 << width) - 1) << lsb) & word) as i64 >> lsb)
+    } else if width == 64 {
+        return Some(word as i64);
+    } else if width == 0 {
+        return Some(0);
+    } else {
+        // get signed value from unsigned word starting at lsb and having width bits
+        let new_word: u64 = word << (64 - (lsb + width));
+        let new_word = new_word as i64;
+        let new_word = new_word >> (64 - width);
+        Some(new_word)
+    }
 }
 
 /// Retrieve a signed value from an unsigned `word`,
@@ -75,7 +94,7 @@ pub fn getu(word: u64, width: u64, lsb: u64) -> Option<u64> {
         return Some(0);
     } else {
         let new_word: u64 = word << (64 - (lsb + width));
-        Some(new_word >> (64 - width)) // problem here?
+        Some(new_word >> (64 - width))
     }
     
 }
@@ -133,9 +152,14 @@ pub fn newu(word: u64, width: u64, lsb: u64, value: u64) -> Option<u64> {
 /// If the value does not fit, returns `None`
 ///
 pub fn news(word: u64, width: u64, lsb: u64, value: i64) -> Option<u64> {
-    // need to test
     // check if the value fits in the field of the word starting at lsb and having width bits
+    if lsb + width > 64 {
+        return None;
+    }
     if fitss(value, width) {
+        if width == 64 {
+            return Some(value as u64);
+        }
         let mask: u64 = ((1 << width) - 1) << lsb;
         let masked_word = word & !mask;
         let masked_value = ((value as u64) << lsb) & mask;
